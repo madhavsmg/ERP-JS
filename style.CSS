@@ -1,0 +1,177 @@
+/* ===== GLOBAL STYLES ===== */
+body {
+  font-family: sans-serif;
+  background-image: url('abstract-flat-background-img.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== STATIC CENTERED LOGO (Watermark) ===== */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 250px;
+  height: 250px;
+  background-image: url('circle logo ss tea.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 45%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+/* ===== CONTAINER STYLES ===== */
+.section, .dashboard, .nav, .card {
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER STYLES ===== */
+h1, h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* ===== DASHBOARD FLEX LAYOUT ===== */
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1 1 200px;
+  max-width: 220px;
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  padding: 15px;
+  margin: 10px;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #222;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* ===== BUTTON STYLES ===== */
+.nav button {
+  margin: 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+.nav button:hover {
+  background: #0056b3;
+}
+
+/* ===== INPUT & SELECT STYLES ===== */
+input, select {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 200px;
+  max-width: 80%;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ===== LIST STYLES ===== */
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+ul li {
+  background-color: #f9f9f9;
+  margin: 5px auto;
+  padding: 10px;
+  border-radius: 6px;
+  width: 90%;
+  max-width: 400px;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== MEDIA QUERIES FOR MOBILE ===== */
+@media (max-width: 600px) {
+  .dashboard {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+    margin-bottom: 10px;
+  }
+
+  input, select {
+    width: 90%;
+  }
+
+  ul li {
+    width: 100%;
+  }
+}
+
+/* ===== CUSTOMERS TABLE ===== */
+#customers table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 20px auto;
+  font-size: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#customers th, #customers td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+#customers th {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+#customers tr:hover {
+  background-color: #f1f7ff;
+}
+
+#customers td {
+  color: #333;
+  text-align: center;
+}

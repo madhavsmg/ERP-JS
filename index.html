@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Siva Sai Enterprises</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Welcome to 📊 Retail ERP Dashboard</h1>
+
+  <div class="dashboard">
+    <div class="card" id="inventory-count">📦 Inventory: 0</div>
+    <div class="card" id="total-sales">💰 Total Sales: ₹0</div>
+    <div class="card" id="total-expenses">🧾 Expenses: ₹0</div>
+    <div class="card" id="net-profit">📈 Net Profit: ₹0</div>
+  </div>
+
+  <div class="nav">
+    <button onclick="showSection('inventory')">Inventory</button>
+    <button onclick="showSection('pos')">POS</button>
+    <button onclick="showSection('finance')">Finance</button>
+    <button onclick="showSection('customers')">Customers</button>
+    <!-- <button onclick="showSection('reports')">Reports</button> -->
+  </div>
+
+  <!-- Inventory Module -->
+  <div class="section" id="inventory" style="display: none;">
+    <h2>📦 Inventory</h2>
+    <input type="text" id="product-name" placeholder="Product Name">
+    <input type="number" id="product-qty" placeholder="Quantity">
+    <input type="number" id="product-price" placeholder="Price">
+    <button onclick="addProduct()">Add Product</button>
+    <ul id="inventory-list"></ul>
+  </div>
+
+  <!-- POS Module -->
+  <div class="section" id="pos" style="display: none;">
+    <h2>🛒 POS - Point of Sale</h2>
+
+    <label for="pos-product">Select Product:</label>
+    <select id="pos-product"></select>
+
+    <input type="number" id="pos-qty" placeholder="Quantity" min="1">
+    <button onclick="addToCart()">Add to Cart</button>
+
+    <h3>🧺 Cart</h3>
+    <ul id="cart-list"></ul>
+    <p><strong>Total: ₹<span id="cart-total">0</span></strong></p>
+    <button onclick="completeSale()">🧾 Complete Sale</button>
+
+    <h3>👤 Customer Info</h3>
+    <input type="text" id="customer-phone" placeholder="Phone Number" onblur="lookupCustomer()">
+    <input type="text" id="customer-name" placeholder="Name">
+    <input type="text" id="customer-city" placeholder="City">
+  </div>
+
+  <!-- Finance Module -->
+  <div class="section" id="finance" style="display: none;">
+    <h2>💵 Expenses</h2>
+    <input type="text" id="expense-name" placeholder="Expense For">
+    <input type="number" id="expense-amount" placeholder="Amount">
+    <button onclick="addExpense()">Add Expense</button>
+    <ul id="expense-list"></ul>
+  </div>
+
+<!-- Customers Module -->
+<div class="section" id="customers" style="display: none;">
+  <h2>👥 Customers</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>City</th>
+      </tr>
+    </thead>
+    <tbody id="customer-table"></tbody>
+  </table>
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
