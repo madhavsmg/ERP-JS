@@ -1,13 +1,14 @@
 // === Basic ERP Backend: Node.js + Express + MongoDB ===
 
 // 1. Setup (run `npm init -y` then install these packages):
-// npm install express mongoose cors body-parser dotenv
+// npm install express mongoose cors body-parser dotenv winston
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const logger = require('./logger');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,13 +17,30 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.url}`, { 
+    ip: req.ip,
+    params: req.params,
+    query: req.query,
+    body: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined
+  });
+  next();
+});
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB Connected'))
-.catch(err => console.error('MongoDB Error:', err));
+.then(() => {
+  logger.info('✅ MongoDB Connected');
+  console.log('✅ MongoDB Connected'); // Keep this important connection message
+})
+.catch(err => {
+  logger.error('MongoDB Connection Error', { error: err });
+  console.error('MongoDB Error:', err);
+});
 
 // === Schemas and Models ===
 const Inventory = mongoose.model('Inventory', new mongoose.Schema({
@@ -55,81 +73,159 @@ const Customer = mongoose.model('Customer', new mongoose.Schema({
 
 // Inventory Routes
 app.get('/inventory', async (req, res) => {
-  const items = await Inventory.find();
-  res.json(items);
+  try {
+    const items = await Inventory.find();
+    res.json(items);
+  } catch (err) {
+    logger.error('Error fetching inventory', { error: err });
+    res.status(500).json({ error: 'Failed to fetch inventory' });
+  }
 });
 
 app.post('/inventory', async (req, res) => {
-  const newItem = new Inventory(req.body);
-  await newItem.save();
-  res.json(newItem);
+  try {
+    const newItem = new Inventory(req.body);
+    await newItem.save();
+    logger.info('New inventory item added', { item: newItem });
+    res.json(newItem);
+  } catch (err) {
+    logger.error('Error creating inventory item', { error: err });
+    res.status(500).json({ error: 'Failed to create inventory item' });
+  }
 });
 
 app.put('/inventory/:id', async (req, res) => {
-  const updated = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
+  try {
+    const updated = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    logger.info('Inventory item updated', { id: req.params.id, updated });
+    res.json(updated);
+  } catch (err) {
+    logger.error('Error updating inventory item', { id: req.params.id, error: err });
+    res.status(500).json({ error: 'Failed to update inventory item' });
+  }
 });
 
 app.delete('/inventory/:id', async (req, res) => {
-  await Inventory.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Deleted' });
+  try {
+    await Inventory.findByIdAndDelete(req.params.id);
+    logger.info('Inventory item deleted', { id: req.params.id });
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    logger.error('Error deleting inventory item', { id: req.params.id, error: err });
+    res.status(500).json({ error: 'Failed to delete inventory item' });
+  }
 });
 
 // Sales Routes
 app.get('/sales', async (req, res) => {
-  const sales = await Sale.find();
-  res.json(sales);
+  try {
+    const sales = await Sale.find();
+    res.json(sales);
+  } catch (err) {
+    logger.error('Error fetching sales', { error: err });
+    res.status(500).json({ error: 'Failed to fetch sales' });
+  }
 });
 
 app.post('/sales', async (req, res) => {
-  const newSale = new Sale(req.body);
-  await newSale.save();
-  res.json(newSale);
+  try {
+    const newSale = new Sale(req.body);
+    await newSale.save();
+    logger.info('New sale recorded', { sale: newSale });
+    res.json(newSale);
+  } catch (err) {
+    logger.error('Error creating sale', { error: err });
+    res.status(500).json({ error: 'Failed to create sale' });
+  }
 });
 
 // Expenses Routes
 app.get('/expenses', async (req, res) => {
-  const expenses = await Expense.find();
-  res.json(expenses);
+  try {
+    const expenses = await Expense.find();
+    res.json(expenses);
+  } catch (err) {
+    logger.error('Error fetching expenses', { error: err });
+    res.status(500).json({ error: 'Failed to fetch expenses' });
+  }
 });
 
 app.post('/expenses', async (req, res) => {
-  const newExpense = new Expense(req.body);
-  await newExpense.save();
-  res.json(newExpense);
+  try {
+    const newExpense = new Expense(req.body);
+    await newExpense.save();
+    logger.info('New expense recorded', { expense: newExpense });
+    res.json(newExpense);
+  } catch (err) {
+    logger.error('Error creating expense', { error: err });
+    res.status(500).json({ error: 'Failed to create expense' });
+  }
 });
 
 // Customer Routes
 app.get('/customers/all', async (req, res) => {
+  try {
     const all = await Customer.find();
     res.json(all);
-  });
+  } catch (err) {
+    logger.error('Error fetching all customers', { error: err });
+    res.status(500).json({ error: 'Failed to fetch customers' });
+  }
+});
   
-  app.get('/customers/:phoneNumber', async (req, res) => {
+app.get('/customers/:phoneNumber', async (req, res) => {
+  try {
     const customer = await Customer.findOne({ phoneNumber: req.params.phoneNumber });
     res.json(customer);
-  });
+  } catch (err) {
+    logger.error('Error finding customer by phone', { phone: req.params.phoneNumber, error: err });
+    res.status(500).json({ error: 'Failed to find customer' });
+  }
+});
   
-  app.post('/customers', async (req, res) => {
+app.post('/customers', async (req, res) => {
+  try {
     const { name, phoneNumber, city } = req.body;
   
-    if (!name || !phoneNumber || !city)
+    if (!name || !phoneNumber || !city) {
+      logger.warn('Incomplete customer data provided', { body: req.body });
       return res.status(400).json({ error: "All fields required" });
+    }
   
     let customer = await Customer.findOne({ phoneNumber });
   
     if (!customer) {
       customer = new Customer({ name, phoneNumber, city });
       await customer.save();
+      logger.info('New customer created', { customer });
+    } else {
+      logger.info('Existing customer found', { phoneNumber });
     }
   
     res.json(customer);
-  });  
+  } catch (err) {
+    logger.error('Error creating/finding customer', { body: req.body, error: err });
+    res.status(500).json({ error: 'Failed to process customer data' });
+  }
+});  
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error('Unhandled application error', { 
+    error: err.message, 
+    stack: err.stack,
+    method: req.method,
+    url: req.url
+  });
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 // Server start
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  logger.info(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 ERP Server running on port ${PORT}`);
 });
 
 // === .env file example ===
 // MONGO_URI=mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/erp-app
+// LOG_LEVEL=info

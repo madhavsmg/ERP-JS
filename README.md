@@ -95,7 +95,7 @@ http-server
 │   ├── server.js       # Express server & MongoDB models
 │   ├── package.json    # Dependencies
 │   └── .env            # Environment variables (create this file)
-├── abstract-flat-background-img.jpg  # Background image
+c├── abstract-flat-background-img.jpg  # Background image
 ├── circle logo ss tea.png            # Logo image
 ├── erp_flowchart.png                 # Flowchart image
 └── README.md           # This documentation
@@ -103,19 +103,45 @@ http-server
 
 ## 🛣️ API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/inventory` | GET | Get all inventory items |
-| `/inventory` | POST | Add new inventory item |
-| `/inventory/:id` | PUT | Update inventory item |
-| `/inventory/:id` | DELETE | Delete inventory item |
-| `/sales` | GET | Get all sales |
-| `/sales` | POST | Add new sale |
-| `/expenses` | GET | Get all expenses |
-| `/expenses` | POST | Add new expense |
-| `/customers/all` | GET | Get all customers |
-| `/customers/:phoneNumber` | GET | Find customer by phone number |
-| `/customers` | POST | Add or update customer |
+| Endpoint | Method | Description | Request Body | Response |
+|----------|--------|-------------|--------------|----------|
+| `/inventory` | GET | Get all inventory items | N/A | Array of inventory objects with name, qty, and price |
+| `/inventory` | POST | Add new inventory item | `{ "name": "Item Name", "qty": 10, "price": 99.99 }` | Created inventory object with MongoDB ID |
+| `/inventory/:id` | PUT | Update inventory item | `{ "name": "Updated Name", "qty": 5, "price": 49.99 }` | Updated inventory object |
+| `/inventory/:id` | DELETE | Delete inventory item | N/A | `{ "message": "Deleted" }` |
+| `/sales` | GET | Get all sales | N/A | Array of sale objects with product, qty, amount, customer, and date |
+| `/sales` | POST | Add new sale | `{ "product": "Item Name", "qty": 2, "amount": 199.98, "customer": "customerId" }` | Created sale object with auto date |
+| `/expenses` | GET | Get all expenses | N/A | Array of expense objects with name and amount |
+| `/expenses` | POST | Add new expense | `{ "name": "Rent", "amount": 1000 }` | Created expense object |
+| `/customers/all` | GET | Get all customers | N/A | Array of customer objects with name, phoneNumber, and city |
+| `/customers/:phoneNumber` | GET | Find customer by phone number | N/A | Customer object or null if not found |
+| `/customers` | POST | Add or update customer | `{ "name": "John Doe", "phoneNumber": "1234567890", "city": "New York" }` | Created/found customer object |
+
+## 📊 Logging
+
+The application uses Winston for logging with the following features:
+
+- **Console Logging**: All logs are printed to the console with colorized output
+- **File Logging**: 
+  - All logs are saved to `logs/combined.log`
+  - Error-level logs are saved to `logs/error.log`
+- **Log Rotation**: Log files are automatically rotated when they reach 5MB
+- **Log Levels**: The logging level can be configured in the `.env` file with `LOG_LEVEL`
+
+### Log Example
+
+```json
+{"level":"info","message":"GET /inventory","ip":"::1","params":{},"query":{},"service":"erp-backend","timestamp":"2025-04-12 10:15:23"}
+```
+
+### Configuration
+
+In your `.env` file, you can set:
+
+```
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/
+LOG_LEVEL=info   # Set to debug, info, warn, or error
+```
 
 ## 🔜 Planned Enhancements
 - Reporting module for sales analytics
