@@ -1,40 +1,59 @@
 # 🧾 Siva Sai Enterprises - Retail ERP
 
-This is a lightweight full-stack ERP application for a retail store built using:
+A lightweight full-stack ERP application for a retail store.
 
-- **Frontend**: Vanilla JavaScript, HTML, CSS
-- **Backend**: Node.js + Express
-- **Database**: MongoDB (Atlas)
+> 📦 Inventory | 🛒 POS | 👥 Customers | 💵 Expenses | 📄 Sales History | 📊 Dashboard
+
+---
+
+## 🧱 Tech Stack
+
+- **Frontend**: Vanilla JavaScript, HTML, CSS  
+- **Backend**: Node.js + Express  
+- **Database**: MongoDB (Atlas)  
+- **Logger**: Winston
+
+---
 
 ## 🎯 Features
 
 ### 🗃 Inventory Management
-- Add products with name, quantity, and price
-- Display and update inventory list
+- Add, edit, and delete products
+- View full inventory list with quantity and price
 
-### 🛒 POS (Point of Sale)
-- Select product and quantity
-- Add to cart and complete sale
-- Link each sale to a customer (new or existing)
+### 🛒 Point of Sale (POS)
+- Add items to cart from dropdown
+- Auto-lookup or register customers
+- Calculate total and complete sale
+- **Automatically reduce inventory stock** after sale
 
 ### 👥 Customer CRM
-- Auto-lookup by phone number
+- Lookup customers by phone number
 - Register new customers (Name, Phone, City)
 - View all customers in a table
+- **Delete customer entries**
 
-### 💵 Expense Management
-- Track expenses by name and amount
-- Update finance dashboard with real-time profit calculation
+### 💵 Expense Tracker
+- Add expenses with name and amount
+- Real-time update in dashboard calculations
 
-### 📊 Dashboard
-- View inventory count
-- Calculate and show total sales, expenses, and net profit
+### 📄 Sales History
+- View complete list of past sales
+- Includes date, customer, product, qty, and amount
+
+### 📊 Live Dashboard
+- Inventory count
+- Total sales
+- Total expenses
+- Net profit
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- MongoDB Atlas account
+- MongoDB Atlas URI (Account with API)
 - Git (optional)
 
 ### Installation
@@ -72,16 +91,47 @@ http-server
 
 ## 📋 Usage Flow
 
-1. **Inventory Management**: Add products to inventory
-2. **POS Operations**:
-   - Select product from dropdown and quantity
-   - Add products to cart
-   - Enter customer phone number (system will auto-lookup existing customers)
-   - For new customers, fill in all required fields (Name, Phone, City)
-   - Complete the sale
-3. **Track Finances**:
-   - Record business expenses
-   - Dashboard will update with real-time calculations
+1. **🗃 Inventory Management**  
+   - Add new products by specifying name, quantity, and price  
+   - View all products in the inventory list  
+   - Use ✏️ to edit product details or 🗑️ to delete items  
+   - Changes reflect immediately in the POS product dropdown and dashboard  
+
+2. **🛒 POS Operations (Point of Sale)**  
+   - Select a product from the dropdown (only in-stock items shown)  
+   - Enter quantity and add it to the cart  
+   - Repeat to add multiple products to the same cart  
+   - Enter **customer phone number**:  
+     - If found, customer name and city (will be fetched and auto-filled)  
+     - If not found, Should fill all 3 fields: Name, Phone, City  
+   - Complete the sale to:  
+     - Record each product sale  
+     - Deduct sold quantity from inventory  
+     - Save/update customer details  
+     - Update dashboard metrics (total sales, profit)
+
+3. **👥 Customer Management**  
+   - View all customers in a structured table (Name, Phone, City)  
+   - Use 🗑️ to delete customers as needed  
+   - Customer auto-detection happens via phone number at checkout
+
+4. **💵 Expense Tracking**  
+   - Add expenses with a description and amount  
+   - All expenses show in a live-updated list  
+   - Dashboard immediately reflects expense totals and net profit
+
+5. **📄 Sales History**  
+   - View a tabular list of all past sales  
+   - Each row shows: Sale Date, Customer, Product, Quantity, Amount  
+   - Helps with manual bookkeeping or future reporting
+
+6. **📊 Dashboard Monitoring**  
+   - Displays real-time stats at the top of the page:  
+     - 📦 Inventory Count  
+     - 💰 Total Sales  
+     - 🧾 Total Expenses  
+     - 📈 Net Profit  
+   - Automatically updates with every sale, inventory change, or expense entry
 
 ## 🧩 Project Structure
 
@@ -109,13 +159,14 @@ c├── abstract-flat-background-img.jpg  # Background image
 | `/inventory` | POST | Add new inventory item | `{ "name": "Item Name", "qty": 10, "price": 99.99 }` | Created inventory object with MongoDB ID |
 | `/inventory/:id` | PUT | Update inventory item | `{ "name": "Updated Name", "qty": 5, "price": 49.99 }` | Updated inventory object |
 | `/inventory/:id` | DELETE | Delete inventory item | N/A | `{ "message": "Deleted" }` |
-| `/sales` | GET | Get all sales | N/A | Array of sale objects with product, qty, amount, customer, and date |
-| `/sales` | POST | Add new sale | `{ "product": "Item Name", "qty": 2, "amount": 199.98, "customer": "customerId" }` | Created sale object with auto date |
-| `/expenses` | GET | Get all expenses | N/A | Array of expense objects with name and amount |
-| `/expenses` | POST | Add new expense | `{ "name": "Rent", "amount": 1000 }` | Created expense object |
+| `/sales` | GET | Get all sales history | N/A | Array of sale objects with product, qty, amount, customer, and date |
+| `/sales` | POST | Record a sale (auto-updates inventory) | `{ "product": "Item Name", "qty": 2, "amount": 199.98, "customer": "John Doe" }` | Created sale object with date |
+| `/expenses` | GET | Get all recorded expenses | N/A | Array of expense objects with name and amount |
+| `/expenses` | POST | Add new expense entry | `{ "name": "Electricity", "amount": 1200 }` | Created expense object |
 | `/customers/all` | GET | Get all customers | N/A | Array of customer objects with name, phoneNumber, and city |
-| `/customers/:phoneNumber` | GET | Find customer by phone number | N/A | Customer object or null if not found |
-| `/customers` | POST | Add or update customer | `{ "name": "John Doe", "phoneNumber": "1234567890", "city": "New York" }` | Created/found customer object |
+| `/customers/:phoneNumber` | GET | Find customer by phone number | N/A | Customer object if found, else null |
+| `/customers/:phoneNumber` | DELETE | Delete a customer by phone | N/A | `{ "message": "Deleted" }` |
+| `/customers` | POST | Add or update customer | `{ "name": "John Doe", "phoneNumber": "1234567890", "city": "New York" }` | Newly created or matched customer object |
 
 ## 📊 Logging
 

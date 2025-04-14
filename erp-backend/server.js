@@ -1,8 +1,5 @@
 // === Basic ERP Backend: Node.js + Express + MongoDB ===
 
-// 1. Setup (run `npm init -y` then install these packages):
-// npm install express mongoose cors body-parser dotenv winston
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -13,13 +10,11 @@ const logger = require('./logger');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Request logging middleware
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.url}`, { 
+  logger.info(`${req.method} ${req.url}`, {
     ip: req.ip,
     params: req.params,
     query: req.query,
@@ -28,14 +23,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => {
   logger.info('✅ MongoDB Connected');
-  console.log('✅ MongoDB Connected'); // Keep this important connection message
+  console.log('✅ MongoDB Connected');
 })
 .catch(err => {
   logger.error('MongoDB Connection Error', { error: err });
@@ -50,13 +44,12 @@ const Inventory = mongoose.model('Inventory', new mongoose.Schema({
 }));
 
 const Sale = mongoose.model('Sale', new mongoose.Schema({
-    product: String,
-    qty: Number,
-    amount: Number,
-    customer: String,
-    date: { type: Date, default: Date.now }
-  }));
-  
+  product: String,
+  qty: Number,
+  amount: Number,
+  customer: String,
+  date: { type: Date, default: Date.now }
+}));
 
 const Expense = mongoose.model('Expense', new mongoose.Schema({
   name: String,
@@ -64,10 +57,10 @@ const Expense = mongoose.model('Expense', new mongoose.Schema({
 }));
 
 const Customer = mongoose.model('Customer', new mongoose.Schema({
-    name: String,
-    phoneNumber: { type: String, unique: true },
-    city: String
-  }));
+  name: String,
+  phoneNumber: { type: String, unique: true },
+  city: String
+}));
 
 // === Routes ===
 
@@ -129,8 +122,22 @@ app.get('/sales', async (req, res) => {
 
 app.post('/sales', async (req, res) => {
   try {
-    const newSale = new Sale(req.body);
+    const { product, qty, amount, customer } = req.body;
+
+    // Validate inventory stock before sale
+    const item = await Inventory.findOne({ name: product });
+    if (!item || item.qty < qty) {
+      return res.status(400).json({ error: 'Insufficient stock for product: ' + product });
+    }
+
+    // Deduct sold quantity from inventory
+    item.qty -= qty;
+    await item.save();
+
+    // Record sale
+    const newSale = new Sale({ product, qty, amount, customer });
     await newSale.save();
+
     logger.info('New sale recorded', { sale: newSale });
     res.json(newSale);
   } catch (err) {
@@ -172,7 +179,7 @@ app.get('/customers/all', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch customers' });
   }
 });
-  
+
 app.get('/customers/:phoneNumber', async (req, res) => {
   try {
     const customer = await Customer.findOne({ phoneNumber: req.params.phoneNumber });
@@ -182,18 +189,18 @@ app.get('/customers/:phoneNumber', async (req, res) => {
     res.status(500).json({ error: 'Failed to find customer' });
   }
 });
-  
+
 app.post('/customers', async (req, res) => {
   try {
     const { name, phoneNumber, city } = req.body;
-  
+
     if (!name || !phoneNumber || !city) {
       logger.warn('Incomplete customer data provided', { body: req.body });
       return res.status(400).json({ error: "All fields required" });
     }
-  
+
     let customer = await Customer.findOne({ phoneNumber });
-  
+
     if (!customer) {
       customer = new Customer({ name, phoneNumber, city });
       await customer.save();
@@ -201,18 +208,18 @@ app.post('/customers', async (req, res) => {
     } else {
       logger.info('Existing customer found', { phoneNumber });
     }
-  
+
     res.json(customer);
   } catch (err) {
     logger.error('Error creating/finding customer', { body: req.body, error: err });
     res.status(500).json({ error: 'Failed to process customer data' });
   }
-});  
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  logger.error('Unhandled application error', { 
-    error: err.message, 
+  logger.error('Unhandled application error', {
+    error: err.message,
     stack: err.stack,
     method: req.method,
     url: req.url
@@ -225,7 +232,3 @@ app.listen(PORT, () => {
   logger.info(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🚀 ERP Server running on port ${PORT}`);
 });
-
-// === .env file example ===
-// MONGO_URI=mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/erp-app
-// LOG_LEVEL=info

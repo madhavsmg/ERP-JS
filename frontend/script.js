@@ -1,5 +1,3 @@
-// === Frontend Script Connected to Node.js + MongoDB Backend ===
-
 let cart = [];
 
 // === Inventory ===
@@ -13,7 +11,11 @@ async function renderInventory() {
 
     inventory.forEach(p => {
       const li = document.createElement("li");
-      li.textContent = `${p.name} - Qty: ${p.qty} - ₹${p.price}`;
+      li.innerHTML = `
+        ${p.name} - Qty: ${p.qty} - ₹${p.price}
+        <button onclick="editProduct('${p._id}', '${p.name}', ${p.qty}, ${p.price})">✏️</button>
+        <button onclick="deleteProduct('${p._id}')">🗑️</button>
+      `;
       list.appendChild(li);
     });
   } catch (err) {
@@ -44,6 +46,36 @@ async function addProduct() {
     populatePOSProducts();
   } catch (err) {
     console.error("Error adding product:", err);
+  }
+}
+
+function editProduct(id, name, qty, price) {
+  const newName = prompt("New name:", name);
+  const newQty = prompt("New quantity:", qty);
+  const newPrice = prompt("New price:", price);
+
+  if (!newName || isNaN(newQty) || isNaN(newPrice)) return alert("Invalid input.");
+
+  fetch(`http://localhost:5000/inventory/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: newName, qty: Number(newQty), price: Number(newPrice) })
+  }).then(() => {
+    renderInventory();
+    updateDashboard();
+    populatePOSProducts();
+  });
+}
+
+function deleteProduct(id) {
+  if (confirm("Delete this product?")) {
+    fetch(`http://localhost:5000/inventory/${id}`, {
+      method: "DELETE"
+    }).then(() => {
+      renderInventory();
+      updateDashboard();
+      populatePOSProducts();
+    });
   }
 }
 
@@ -98,7 +130,7 @@ async function populatePOSProducts() {
     const res = await fetch("http://localhost:5000/inventory");
     const inventory = await res.json();
 
-    inventory.forEach((item, index) => {
+    inventory.forEach(item => {
       if (item.qty > 0) {
         const option = document.createElement("option");
         option.value = item._id;
@@ -160,19 +192,14 @@ async function completeSale() {
   const customerRes = await fetch(`http://localhost:5000/customers/${phone}`);
   const customer = await customerRes.json();
 
-  // Case 2 & 3: Already registered
   if (customer && customer.phoneNumber) {
-    // Proceed to record sale with customer name
     await finalizeSale(customer.name);
-  }
-  // Case 1: New customer, all fields required
-  else if (name && city) {
+  } else if (name && city) {
     await fetch("http://localhost:5000/customers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, phoneNumber: phone, city })
     });
-
     await finalizeSale(name);
   } else {
     alert("Customer not found. Please enter full details to complete transaction.");
@@ -198,7 +225,7 @@ async function finalizeSale(customerName) {
   renderInventory();
   updateDashboard();
   populatePOSProducts();
-  alert("Sale completed for " + customerName + "!" + " 🙏 Thank you for shopping with us!");
+  alert(`Sale completed for ${customerName}! 🙏`);
 }
 
 // === Customer Lookup ===
@@ -222,24 +249,6 @@ async function lookupCustomer() {
   }
 }
 
-async function saveCustomerIfNeeded() {
-  const name = document.getElementById("customer-name").value;
-  const phone = document.getElementById("customer-phone").value;
-  const city = document.getElementById("customer-city").value;
-
-  if (!phone || !name || !city) return;
-
-  try {
-    await fetch("http://localhost:5000/customers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phoneNumber: phone, city })
-    });
-  } catch (err) {
-    console.error("Error saving customer:", err);
-  }
-}
-
 async function renderCustomers() {
   try {
     const res = await fetch("http://localhost:5000/customers/all");
@@ -249,7 +258,12 @@ async function renderCustomers() {
 
     customers.forEach(c => {
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${c.name}</td><td>${c.phoneNumber}</td><td>${c.city}</td>`;
+      row.innerHTML = `
+        <td>${c.name}</td>
+        <td>${c.phoneNumber}</td>
+        <td>${c.city}</td>
+        <td><button onclick="deleteCustomer('${c.phoneNumber}')">🗑️</button></td>
+      `;
       table.appendChild(row);
     });
   } catch (err) {
@@ -257,6 +271,40 @@ async function renderCustomers() {
   }
 }
 
+async function deleteCustomer(phoneNumber) {
+  if (confirm("Delete this customer?")) {
+    try {
+      await fetch(`http://localhost:5000/customers/${phoneNumber}`, { method: "DELETE" });
+      renderCustomers();
+    } catch (err) {
+      console.error("Error deleting customer:", err);
+    }
+  }
+}
+
+// === Sales View ===
+async function renderSales() {
+  try {
+    const res = await fetch("http://localhost:5000/sales");
+    const sales = await res.json();
+    const table = document.getElementById("sales-table");
+    table.innerHTML = "";
+
+    sales.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(s.date).toLocaleString()}</td>
+        <td>${s.customer}</td>
+        <td>${s.product}</td>
+        <td>${s.qty}</td>
+        <td>₹${s.amount}</td>
+      `;
+      table.appendChild(row);
+    });
+  } catch (err) {
+    console.error("Failed to load sales:", err);
+  }
+}
 
 // === Dashboard ===
 async function updateDashboard() {
@@ -271,16 +319,7 @@ async function updateDashboard() {
     const sales = await salesRes.json();
     const expenses = await expensesRes.json();
 
-    // Handle both types of sale objects
-    let totalSales = 0;
-    sales.forEach(sale => {
-      if (sale.amount) {
-        totalSales += sale.amount;
-      } else if (sale.total_amount) {
-        totalSales += sale.total_amount;
-      }
-    });
-
+    let totalSales = sales.reduce((sum, s) => sum + (s.amount || 0), 0);
     let totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
     let netProfit = totalSales - totalExpenses;
 
@@ -288,20 +327,19 @@ async function updateDashboard() {
     document.getElementById("total-sales").textContent = `₹${totalSales}`;
     document.getElementById("total-expenses").textContent = `₹${totalExpenses}`;
     document.getElementById("net-profit").textContent = `₹${netProfit}`;
-
   } catch (err) {
     console.error("Failed to load dashboard data:", err);
   }
 }
 
-
 // === Section Navigation ===
 function showSection(id) {
   document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
   document.getElementById(id).style.display = "block";
-  if (id === 'customers') renderCustomers();
-}
 
+  if (id === 'customers') renderCustomers();
+  if (id === 'sales') renderSales();
+}
 
 // === Init ===
 renderInventory();
