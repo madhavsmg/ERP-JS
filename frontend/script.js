@@ -10,22 +10,23 @@ async function renderInventory() {
     const inventory = await res.json();
 
     inventory.forEach(p => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <span class="item-details">
-          ${p.name} - Qty: ${p.qty} - ₹${p.price}
-        </span>
-        <span class="actions">
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>₹${p.price}</td>
+        <td>
           <button onclick="editProduct('${p._id}', '${p.name}', ${p.qty}, ${p.price})">✏️</button>
           <button onclick="deleteProduct('${p._id}')">🗑️</button>
-        </span>
+        </td>
       `;
-      list.appendChild(li);
+      list.appendChild(row);
     });
   } catch (err) {
     console.error("Failed to load inventory:", err);
   }
 }
+
 
 async function addProduct() {
   const name = document.getElementById("product-name").value;
@@ -55,8 +56,13 @@ async function addProduct() {
 
 function editProduct(id, name, qty, price) {
   const newName = prompt("New name:", name);
+  if (newName === null) return; // Cancelled
+
   const newQty = prompt("New quantity:", qty);
+  if (newQty === null) return;
+
   const newPrice = prompt("New price:", price);
+  if (newPrice === null) return;
 
   if (!newName || isNaN(newQty) || isNaN(newPrice)) return alert("Invalid input.");
 
