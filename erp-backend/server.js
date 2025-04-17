@@ -169,6 +169,28 @@ app.post('/expenses', async (req, res) => {
   }
 });
 
+app.put('/expenses/:id', async (req, res) => {
+  try {
+    const updated = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    logger.info('Expense updated', { id: req.params.id, updated });
+    res.json(updated);
+  } catch (err) {
+    logger.error('Error updating expense', { id: req.params.id, error: err });
+    res.status(500).json({ error: 'Failed to update expense' });
+  }
+});
+
+app.delete('/expenses/:id', async (req, res) => {
+  try {
+    await Expense.findByIdAndDelete(req.params.id);
+    logger.info('Expense deleted', { id: req.params.id });
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    logger.error('Error deleting expense', { id: req.params.id, error: err });
+    res.status(500).json({ error: 'Failed to delete expense' });
+  }
+});
+
 // Customer Routes
 app.get('/customers/all', async (req, res) => {
   try {
