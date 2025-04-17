@@ -32,7 +32,7 @@ body::before {
 
 /* ===== CONTAINER STYLES ===== */
 .section, .dashboard, .nav, .card {
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: rgba(255, 255, 255, 0.85);
   border-radius: 12px;
   padding: 15px;
   margin-top: 15px;
@@ -91,10 +91,9 @@ h1, h2 {
 button {
   cursor: pointer;
   border: none;
-  padding: 5px 10px;
+  padding: 10px;
   border-radius: 6px;
-  margin-left: 5px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background-color: #eee;
   transition: background 0.2s ease;
 }
@@ -112,6 +111,8 @@ input, select {
   font-size: 1rem;
   width: 200px;
   max-width: 80%;
+  height: 40px;
+  box-sizing: border-box;
 }
 
 /* ===== LIST STYLES ===== */
@@ -122,6 +123,9 @@ ul {
 }
 
 ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #f9f9f9;
   margin: 5px auto;
   padding: 10px;
@@ -130,6 +134,211 @@ ul li {
   max-width: 400px;
   text-align: left;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.item-details {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  background-color: #eee;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.actions button:hover {
+  background-color: #ccc;
+}
+
+/* ===== SUBHEADINGS FOR POS COLUMNS ===== */
+.subheading-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.subheading-row h3:last-child {
+  text-align: left;
+  width: 100%;
+  padding-left: 10px;
+}
+
+/* ===== POS MODULE LAYOUT ===== */
+.pos-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cart-section {
+  flex: 0 0 72%;
+}
+
+.customer-section {
+  flex: 0 0 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+/* ===== SUBHEADINGs ===== */
+
+.cart-section h3 {
+  text-align: left;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 5px;
+}
+
+.customer-section h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+/* ===== POS INPUT ROW ===== */
+.cart-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  margin: 15px 0px;
+}
+
+.cart-inputs select,
+.cart-inputs input,
+.cart-inputs button {
+  height: 40px;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 5px 0;
+}
+
+/* ===== CUSTOMER SECTION INPUTS UNIFORMITY ===== */
+.customer-section input,
+.customer-section button {
+  width: 100% !important;
+  height: 40px;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* ===== DISTINCT BUTTON COLORS ===== */
+.cart-inputs button {
+  background-color: #f97316; /* orangish coral */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  height: 40px;
+  padding: 10px;
+  box-sizing: border-box;
+  transition: background 0.2s ease;
+  }
+  .cart-inputs button:hover {
+    background-color: #ea580c;
+  }
+
+.customer-section button.fetch-btn {
+  background-color: #6f42c1; /* purple */
+  color: white;
+  font-weight: bold;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.customer-section button.fetch-btn:hover {
+  background-color: #5a32a3;
+}
+
+.complete-sale-btn {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  height: 45px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.complete-sale-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* ===== CART TABLE STYLES ===== */
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cart-table th, .cart-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.cart-table th {
+  background-color: #007bff;
+  color: white;
+}
+
+.cart-table td:first-child {
+  text-align: left;
+}
+.cart-table td:not(:first-child) {
+  text-align: center;
+}
+
+/* ===== CART TOTAL STYLES ===== */
+
+.cart-total-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 30px;
+  margin-top: 5px;
+}
+
+.cart-total {
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: right;
+  opacity: 0.85;
+  margin: 10px 0;
 }
 
 /* ===== TABLE STYLES (Customers & Sales) ===== */
@@ -180,5 +389,31 @@ ul li {
 
   ul li {
     width: 100%;
+  }
+
+  .pos-layout {
+    flex-direction: column;
+  }
+
+  .cart-section,
+  .customer-section {
+    flex: 100%;
+  }
+
+  .cart-total {
+    text-align: right;
+  }
+
+  .complete-sale-btn {
+    width: 100%;
+  }
+
+  .subheading-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .subheading-row h3 {
+    text-align: center !important;
   }
 }

@@ -1,4 +1,4 @@
-# 🧾 Siva Sai Enterprises - Retail ERP
+# 🧾 Siva Sai Enterprises - Retail ERP System
 
 A lightweight full-stack ERP application for a retail store.
 

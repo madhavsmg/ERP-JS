@@ -12,9 +12,13 @@ async function renderInventory() {
     inventory.forEach(p => {
       const li = document.createElement("li");
       li.innerHTML = `
-        ${p.name} - Qty: ${p.qty} - ₹${p.price}
-        <button onclick="editProduct('${p._id}', '${p.name}', ${p.qty}, ${p.price})">✏️</button>
-        <button onclick="deleteProduct('${p._id}')">🗑️</button>
+        <span class="item-details">
+          ${p.name} - Qty: ${p.qty} - ₹${p.price}
+        </span>
+        <span class="actions">
+          <button onclick="editProduct('${p._id}', '${p.name}', ${p.qty}, ${p.price})">✏️</button>
+          <button onclick="deleteProduct('${p._id}')">🗑️</button>
+        </span>
       `;
       list.appendChild(li);
     });
@@ -28,7 +32,7 @@ async function addProduct() {
   const qty = parseInt(document.getElementById("product-qty").value);
   const price = parseFloat(document.getElementById("product-price").value);
 
-  if (!name || isNaN(qty) || isNaN(price)) return alert("Enter valid product, quantity & price");
+  if (!name || isNaN(qty) || isNaN(price) || qty < 0 || price < 0) return alert("Enter valid, non-negative values.");
 
   try {
     await fetch("http://localhost:5000/inventory", {
@@ -102,7 +106,7 @@ async function addExpense() {
   const name = document.getElementById("expense-name").value;
   const amount = parseFloat(document.getElementById("expense-amount").value);
 
-  if (!name || isNaN(amount)) return alert("Enter valid expense & amount");
+  if (!name || isNaN(amount) || amount < 0) return alert("Enter valid non-negative amount");
 
   try {
     await fetch("http://localhost:5000/expenses", {
@@ -124,7 +128,7 @@ async function addExpense() {
 // === POS ===
 async function populatePOSProducts() {
   const select = document.getElementById("pos-product");
-  select.innerHTML = "";
+  select.innerHTML = `<option value="" disabled selected hidden>-- Select a Product --</option>`;
 
   try {
     const res = await fetch("http://localhost:5000/inventory");
@@ -137,6 +141,7 @@ async function populatePOSProducts() {
         option.textContent = `${item.name} - ₹${item.price} (Qty: ${item.qty})`;
         option.dataset.name = item.name;
         option.dataset.price = item.price;
+        option.dataset.qty = item.qty;        
         select.appendChild(option);
       }
     });
@@ -148,14 +153,23 @@ async function populatePOSProducts() {
 function addToCart() {
   const select = document.getElementById("pos-product");
   const selected = select.options[select.selectedIndex];
+  if (!selected || !selected.value) return alert("Please select a valid product.");
+
   const productId = selected.value;
   const name = selected.dataset.name;
   const price = parseFloat(selected.dataset.price);
+  const availableQty = parseInt(selected.dataset.qty);
   const qty = parseInt(document.getElementById("pos-qty").value);
 
-  if (!productId || isNaN(qty) || qty < 1) return alert("Select a product and valid quantity");
+  if (isNaN(qty) || qty < 1) return alert("Enter a valid quantity");
 
   const existing = cart.find(c => c.id === productId);
+  const currentQtyInCart = existing ? existing.qty : 0;
+
+  if (qty + currentQtyInCart > availableQty) {
+    return alert(`❌ Not enough stock! Only ${availableQty - currentQtyInCart} more unit(s) available for ${name}.`);
+  }
+
   if (existing) {
     existing.qty += qty;
     existing.subtotal = existing.qty * price;
@@ -168,17 +182,28 @@ function addToCart() {
 }
 
 function renderCart() {
-  const list = document.getElementById("cart-list");
-  list.innerHTML = "";
+  const tbody = document.getElementById("cart-list");
+  tbody.innerHTML = "";
   let total = 0;
+
   cart.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = `${item.name} x${item.qty} = ₹${item.subtotal}`;
-    list.appendChild(li);
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>₹${item.price}</td>
+      <td>${item.qty}</td>
+      <td>₹${item.subtotal}</td>
+    `;
+    tbody.appendChild(row);
     total += item.subtotal;
   });
+
   document.getElementById("cart-total").textContent = total;
 }
+
+function confirmSale() {
+    completeSale();
+  }
 
 async function completeSale() {
   if (cart.length === 0) return alert("Cart is empty!");
@@ -202,53 +227,92 @@ async function completeSale() {
     });
     await finalizeSale(name);
   } else {
-    alert("Customer not found. Please enter full details to complete transaction.");
+    alert("Customer not found. Please enter name and city to register.");
   }
 }
 
 async function finalizeSale(customerName) {
-  for (const item of cart) {
-    await fetch("http://localhost:5000/sales", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        product: item.name,
-        qty: item.qty,
-        amount: item.subtotal,
-        customer: customerName
-      })
-    });
-  }
+  try {
+    // 1. Fetch latest inventory
+    const inventoryRes = await fetch("http://localhost:5000/inventory");
+    const inventory = await inventoryRes.json();
 
-  cart = [];
-  renderCart();
-  renderInventory();
-  updateDashboard();
-  populatePOSProducts();
-  alert(`Sale completed for ${customerName}! 🙏`);
+    // 2. Build a lookup map of inventory
+    const inventoryMap = {};
+    inventory.forEach(item => {
+      inventoryMap[item.name] = item.qty;
+    });
+
+    // 3. Check each cart item against available stock
+    for (const item of cart) {
+      const available = inventoryMap[item.name] || 0;
+      if (item.qty > available) {
+        alert(`❌ Not enough stock for "${item.name}". Available: ${available}, In Cart: ${item.qty}`);
+        return; // Prevent proceeding to sale
+      }
+    }
+
+    // 4. Final confirmation after passing all validations
+    const confirmMsg = `Are you sure you want to complete this sale for ${customerName}?`;
+    if (!confirm(confirmMsg)) return;
+
+    // 5. Proceed to send each sale to backend
+    for (const item of cart) {
+      const res = await fetch("http://localhost:5000/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product: item.name,
+          qty: item.qty,
+          amount: item.subtotal,
+          customer: customerName
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`❌ Error: ${err.error}`);
+        return;
+      }
+    }
+
+    cart = [];
+    renderCart();
+    renderInventory();
+    updateDashboard();
+    populatePOSProducts();
+    alert(`✅ Sale completed for ${customerName}`);
+  } catch (err) {
+    console.error("❌ finalizeSale error:", err);
+    alert("Something went wrong while completing the sale.");
+  }
 }
 
-// === Customer Lookup ===
-async function lookupCustomer() {
-  const phone = document.getElementById("customer-phone").value;
-  if (!phone) return;
+// === Fetch Customer Info Button ===
+async function fetchCustomer() {
+  const phone = document.getElementById("customer-phone").value.trim();
+  if (!phone) return alert("Please enter a phone number first.");
 
   try {
     const res = await fetch(`http://localhost:5000/customers/${phone}`);
     const customer = await res.json();
 
-    if (customer) {
+    if (customer && customer.name) {
+      // alert(`Customer found: ${customer.name}, ${customer.city}`);
       document.getElementById("customer-name").value = customer.name;
       document.getElementById("customer-city").value = customer.city;
     } else {
+      alert("Customer not found. Please fill in name and city to register.");
       document.getElementById("customer-name").value = "";
       document.getElementById("customer-city").value = "";
     }
   } catch (err) {
-    console.error("Error finding customer:", err);
+    console.error("Fetch error:", err);
+    alert("Error checking customer info.");
   }
 }
 
+// === Customer Rendering & Deletion ===
 async function renderCustomers() {
   try {
     const res = await fetch("http://localhost:5000/customers/all");
@@ -282,7 +346,7 @@ async function deleteCustomer(phoneNumber) {
   }
 }
 
-// === Sales View ===
+// === Sales History ===
 async function renderSales() {
   try {
     const res = await fetch("http://localhost:5000/sales");
@@ -306,7 +370,7 @@ async function renderSales() {
   }
 }
 
-// === Dashboard ===
+// === Dashboard Metrics ===
 async function updateDashboard() {
   try {
     const [inventoryRes, salesRes, expensesRes] = await Promise.all([
@@ -323,10 +387,10 @@ async function updateDashboard() {
     let totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
     let netProfit = totalSales - totalExpenses;
 
-    document.getElementById("inventory-count").textContent = inventory.length;
-    document.getElementById("total-sales").textContent = `₹${totalSales}`;
-    document.getElementById("total-expenses").textContent = `₹${totalExpenses}`;
-    document.getElementById("net-profit").textContent = `₹${netProfit}`;
+    document.getElementById("inventory-count").innerHTML = `📦 Inventory: ${inventory.length}`;
+    document.getElementById("total-sales").innerHTML = `💰 Total Sales: ₹${totalSales}`;
+    document.getElementById("total-expenses").innerHTML = `🧾 Expenses: ₹${totalExpenses}`;
+    document.getElementById("net-profit").innerHTML = `📈 Net Profit: ₹${netProfit}`;
   } catch (err) {
     console.error("Failed to load dashboard data:", err);
   }
@@ -341,7 +405,7 @@ function showSection(id) {
   if (id === 'sales') renderSales();
 }
 
-// === Init ===
+// === Init on Load ===
 renderInventory();
 renderExpenses();
 renderCart();
