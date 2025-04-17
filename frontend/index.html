@@ -32,7 +32,7 @@
     <input type="text" id="product-name" placeholder="Product Name">
     <input type="number" id="product-qty" placeholder="Quantity" min="0">
     <input type="number" id="product-price" placeholder="Price" min="0">
-    <button onclick="addProduct()">Add Product</button>
+    <button class="orange-btn" onclick="addProduct()">Add Product</button>
     <table id="inventory-table" class="data-table">
       <thead>
         <tr>
@@ -83,7 +83,7 @@
       <div class="customer-section">
         <h3>👤 Customer Info</h3>
         <input type="text" id="customer-phone" placeholder="Phone Number">
-        <button onclick="fetchCustomer()">🔍 Fetch Info</button>
+        <button class="fetch-btn" onclick="fetchCustomer()">🔍 Fetch Info</button>
         <input type="text" id="customer-name" placeholder="Name">
         <input type="text" id="customer-city" placeholder="City">
         <button class="complete-sale-btn" onclick="confirmSale()">✅ Complete Sale</button>
@@ -95,8 +95,17 @@
     <h2>💵 Expenses</h2>
     <input type="text" id="expense-name" placeholder="Expense For">
     <input type="number" id="expense-amount" placeholder="Amount">
-    <button onclick="addExpense()">Add Expense</button>
-    <ul id="expense-list"></ul>
+    <button class="orange-btn" onclick="addExpense()">Add Expense</button>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Expense</th>
+          <th>Amount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="expense-list"></tbody>
+    </table>
   </div>
 
   <!-- Customers Module -->

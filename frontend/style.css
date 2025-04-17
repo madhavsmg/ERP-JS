@@ -268,16 +268,21 @@ ul li {
     background-color: #ea580c;
   }
 
+
 .customer-section button.fetch-btn {
-  background-color: #6f42c1; /* purple */
+  background-color: #0d9488;  /* Dark Teal */
   color: white;
   font-weight: bold;
   border: none;
-  transition: background 0.2s ease;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .customer-section button.fetch-btn:hover {
-  background-color: #5a32a3;
+  background-color: #0f766e; /* Slightly darker teal for hover */
 }
 
 .complete-sale-btn {
@@ -294,6 +299,23 @@ ul li {
 
 .complete-sale-btn:hover {
   background-color: #1e7e34;
+}
+
+.orange-btn {
+  background-color: #f97316; /* Orange (like Add to Cart) */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  height: 40px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.orange-btn:hover {
+  background-color: #ea580c; /* Darker orange on hover */
 }
 
 /* ===== CART TABLE STYLES ===== */

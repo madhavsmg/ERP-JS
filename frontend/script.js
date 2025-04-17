@@ -99,9 +99,16 @@ async function renderExpenses() {
     const expenses = await res.json();
 
     expenses.forEach(e => {
-      const li = document.createElement("li");
-      li.textContent = `${e.name} - ₹${e.amount}`;
-      list.appendChild(li);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${e.name}</td>
+        <td>₹${e.amount}</td>
+        <td>
+          <button onclick="editExpense('${e._id}', '${e.name}', ${e.amount})">✏️</button>
+          <button onclick="deleteExpense('${e._id}')">🗑️</button>
+        </td>
+      `;
+      list.appendChild(row);
     });
   } catch (err) {
     console.error("Failed to load expenses:", err);
@@ -128,6 +135,36 @@ async function addExpense() {
     updateDashboard();
   } catch (err) {
     console.error("Error adding expense:", err);
+  }
+}
+
+function editExpense(id, name, amount) {
+  const newName = prompt("Update expense name:", name);
+  if (newName === null) return;
+
+  const newAmount = prompt("Update amount:", amount);
+  if (newAmount === null) return;
+
+  if (!newName || isNaN(newAmount)) return alert("Invalid input.");
+
+  fetch(`http://localhost:5000/expenses/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: newName, amount: parseFloat(newAmount) })
+  }).then(() => {
+    renderExpenses();
+    updateDashboard();
+  });
+}
+
+function deleteExpense(id) {
+  if (confirm("Delete this expense?")) {
+    fetch(`http://localhost:5000/expenses/${id}`, {
+      method: "DELETE"
+    }).then(() => {
+      renderExpenses();
+      updateDashboard();
+    });
   }
 }
 
