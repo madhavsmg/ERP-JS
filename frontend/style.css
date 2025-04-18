@@ -6,7 +6,7 @@ body {
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
-  padding: 20px;
+  padding-top: 60px; /* prevent header overlap */
   text-align: center;
   position: relative;
   min-height: 100vh;
@@ -30,8 +30,73 @@ body::before {
   z-index: 0;
 }
 
+/* ===== FIXED HEADER STYLES ===== */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  z-index: 1000;
+  gap: 20px; /* gives spacing between logo, links, and profile */
+}
+
+/* ===== PROFILE BUTTON ===== */
+.profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  margin: 0px 40px; 
+}
+
+.profile-btn img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* ===== NAVIGATION LINKS ===== */
+.header-nav {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.header-nav a {
+  margin: 0 10px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.header-nav a:hover {
+  color: #007bff;
+}
+
+/* ===== LOGO ON RIGHT ===== */
+.logo-container {
+  height: 45px;
+  width: 45px;
+}
+
+.logo-container .logo-img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 /* ===== CONTAINER STYLES ===== */
-.section, .dashboard, .nav, .card {
+.section, .dashboard, .card {
   background-color: rgba(255, 255, 255, 0.85);
   border-radius: 12px;
   padding: 15px;
@@ -71,22 +136,6 @@ h1, h2 {
 }
 
 /* ===== BUTTON STYLES ===== */
-.nav button {
-  margin: 5px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background 0.3s ease;
-}
-
-.nav button:hover {
-  background: #0056b3;
-}
 
 button {
   cursor: pointer;
@@ -240,7 +289,8 @@ ul li {
 
 /* ===== CUSTOMER SECTION INPUTS UNIFORMITY ===== */
 .customer-section input,
-.customer-section button {
+.customer-section button,
+.customer-section select {
   width: 100% !important;
   height: 40px;
   padding: 10px;
@@ -406,6 +456,17 @@ ul li {
 }
 
 /* ===== MEDIA QUERIES FOR MOBILE ===== */
+
+@media (max-width: 768px) {
+  .header-nav {
+    display: none; /* hide links on smaller screens for now */
+  }
+
+  .fixed-header {
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 600px) {
   .dashboard {
     flex-direction: column;

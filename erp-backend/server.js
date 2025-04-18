@@ -44,10 +44,18 @@ const Inventory = mongoose.model('Inventory', new mongoose.Schema({
 }));
 
 const Sale = mongoose.model('Sale', new mongoose.Schema({
-  product: String,
-  qty: Number,
-  amount: Number,
+  orderId: String,
   customer: String,
+  paymentMode: String,
+  items: [
+    {
+      product: String,
+      qty: Number,
+      price: Number,
+      subtotal: Number
+    }
+  ],
+  total_amount: Number,
   date: { type: Date, default: Date.now }
 }));
 
@@ -122,27 +130,33 @@ app.get('/sales', async (req, res) => {
 
 app.post('/sales', async (req, res) => {
   try {
-    const { product, qty, amount, customer } = req.body;
+    const { orderId, customer, paymentMode, items, total_amount } = req.body;
 
-    // Validate inventory stock before sale
-    const item = await Inventory.findOne({ name: product });
-    if (!item || item.qty < qty) {
-      return res.status(400).json({ error: 'Insufficient stock for product: ' + product });
+    if (!orderId || !customer || !paymentMode || !Array.isArray(items) || !items.length || !total_amount) {
+      return res.status(400).json({ error: "Missing required fields for sale" });
     }
 
-    // Deduct sold quantity from inventory
-    item.qty -= qty;
-    await item.save();
+    for (const item of items) {
+      if (!item.product || typeof item.qty !== 'number' || typeof item.price !== 'number') {
+        return res.status(400).json({ error: "Invalid item structure" });
+      }
+    }
 
-    // Record sale
-    const newSale = new Sale({ product, qty, amount, customer });
+    const newSale = new Sale({
+      orderId,
+      customer,
+      paymentMode,
+      items,
+      total_amount
+    });
+
     await newSale.save();
+    logger.info('✅ Grouped sale recorded', { orderId, customer, total_amount });
+    res.status(201).json(newSale);
 
-    logger.info('New sale recorded', { sale: newSale });
-    res.json(newSale);
   } catch (err) {
-    logger.error('Error creating sale', { error: err });
-    res.status(500).json({ error: 'Failed to create sale' });
+    logger.error('❌ Error recording grouped sale', { error: err });
+    res.status(500).json({ error: 'Failed to record sale' });
   }
 });
 

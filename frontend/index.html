@@ -9,6 +9,29 @@
 </head>
 
 <body>
+
+<!-- Fixed Header -->
+<header class="fixed-header">
+  <div class="logo-container">
+    <img src="circle logo ss tea.png" alt="Logo" class="logo-img" />
+  </div>
+
+  <nav class="header-nav">
+    <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+    <a href="#" onclick="showSection('inventory')">Inventory</a>
+    <a href="#" onclick="showSection('pos')">POS</a>
+    <a href="#" onclick="showSection('finance')">Finance</a>
+    <a href="#" onclick="showSection('customers')">Customers</a>
+    <a href="#" onclick="showSection('sales')">Sales</a>
+  </nav>
+
+  <button class="profile-btn" title="Login (Coming Soon)">
+    <img src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png" alt="Profile" />
+  </button>
+</header>
+
+<!-- Dashboard Section -->
+<div class="section" id="dashboard">
   <h1>Welcome to 📊 Retail ERP Dashboard</h1>
 
   <div class="dashboard">
@@ -17,14 +40,7 @@
     <div class="card" id="total-expenses">🧾 Expenses: ₹0</div>
     <div class="card" id="net-profit">📈 Net Profit: ₹0</div>
   </div>
-
-  <div class="nav">
-    <button onclick="showSection('inventory')">Inventory</button>
-    <button onclick="showSection('pos')">POS</button>
-    <button onclick="showSection('finance')">Finance</button>
-    <button onclick="showSection('customers')">Customers</button>
-    <button onclick="showSection('sales')">Sales</button>
-  </div>
+</div>
 
   <!-- Inventory Module -->
   <div class="section" id="inventory" style="display: none;">
@@ -86,6 +102,13 @@
         <button class="fetch-btn" onclick="fetchCustomer()">🔍 Fetch Info</button>
         <input type="text" id="customer-name" placeholder="Name">
         <input type="text" id="customer-city" placeholder="City">
+        <select id="payment-mode">
+          <option value="" disabled selected hidden>-- Select a Payment Mode --</option>
+          <option value="Cash">💵 Cash</option>
+          <option value="Card">💳 Card</option>
+          <option value="UPI">📱 UPI</option>
+          <option value="Wallet">💰 Wallet</option>
+        </select>
         <button class="complete-sale-btn" onclick="confirmSale()">✅ Complete Sale</button>
       </div>
     </div>
@@ -111,6 +134,14 @@
   <!-- Customers Module -->
   <div class="section" id="customers" style="display: none;">
     <h2>👥 Customers</h2>
+
+    <div class="customer-add-form">
+      <input type="text" id="new-customer-name" placeholder="Customer Name">
+      <input type="text" id="new-customer-phone" placeholder="Phone Number">
+      <input type="text" id="new-customer-city" placeholder="City">
+      <button class="orange-btn" onclick="addCustomer()">Add Customer</button>
+    </div>
+
     <table class="data-table">
       <thead>
         <tr>
@@ -123,6 +154,7 @@
       <tbody id="customer-table"></tbody>
     </table>
   </div>
+
 
   <!-- Sales Module -->
   <div class="section" id="sales" style="display: none;">
