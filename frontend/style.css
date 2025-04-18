@@ -185,28 +185,6 @@ ul li {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.item-details {
-  flex: 1;
-}
-
-.actions {
-  display: flex;
-  gap: 6px;
-}
-
-.actions button {
-  background-color: #eee;
-  border: none;
-  padding: 4px 6px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.actions button:hover {
-  background-color: #ccc;
-}
-
 /* ===== SUBHEADINGS FOR POS COLUMNS ===== */
 .subheading-row {
   display: flex;

@@ -245,10 +245,6 @@ function renderCart() {
   document.getElementById("cart-total").textContent = total;
 }
 
-function confirmSale() {
-  completeGroupedSale(); // new improved function
-}
-
 async function completeGroupedSale() {
   if (cart.length === 0) return alert("Cart is empty!");
 
@@ -320,63 +316,6 @@ async function completeGroupedSale() {
     document.getElementById("customer-city").value = "";
   } catch (err) {
     console.error("❌ Error in completeGroupedSale:", err);
-    alert("Something went wrong while completing the sale.");
-  }
-}
-
-async function finalizeSale(customerName) {
-  try {
-    // 1. Fetch latest inventory
-    const inventoryRes = await fetch("http://localhost:5000/inventory");
-    const inventory = await inventoryRes.json();
-
-    // 2. Build a lookup map of inventory
-    const inventoryMap = {};
-    inventory.forEach(item => {
-      inventoryMap[item.name] = item.qty;
-    });
-
-    // 3. Check each cart item against available stock
-    for (const item of cart) {
-      const available = inventoryMap[item.name] || 0;
-      if (item.qty > available) {
-        alert(`❌ Not enough stock for "${item.name}". Available: ${available}, In Cart: ${item.qty}`);
-        return; // Prevent proceeding to sale
-      }
-    }
-
-    // 4. Final confirmation after passing all validations
-    const confirmMsg = `Are you sure you want to complete this sale for ${customerName}?`;
-    if (!confirm(confirmMsg)) return;
-
-    // 5. Proceed to send each sale to backend
-    for (const item of cart) {
-      const res = await fetch("http://localhost:5000/sales", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: item.name,
-          qty: item.qty,
-          amount: item.subtotal,
-          customer: customerName
-        })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(`❌ Error: ${err.error}`);
-        return;
-      }
-    }
-
-    cart = [];
-    renderCart();
-    renderInventory();
-    updateDashboard();
-    populatePOSProducts();
-    alert(`✅ Sale completed for ${customerName}`);
-  } catch (err) {
-    console.error("❌ finalizeSale error:", err);
     alert("Something went wrong while completing the sale.");
   }
 }
