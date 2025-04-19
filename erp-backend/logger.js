@@ -9,31 +9,12 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
-// Create a filter to exclude routine API calls from console output
-const excludeRoutineApiFilter = winston.format((info) => {
-  // Filter out ALL GET requests from console output
-  if (info.message && info.message.startsWith('GET /')) {
-    return false; // Exclude from console output
-  }
-  return info;
-});
-
 // Create logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
   defaultMeta: { service: 'erp-backend' },
   transports: [
-    // Write all logs to console, but filter routine API calls
-    new winston.transports.Console({
-      format: winston.format.combine(
-        excludeRoutineApiFilter(),
-        winston.format.colorize(),
-        winston.format.printf(
-          info => `${info.timestamp} ${info.level}: ${info.message}`
-        )
-      )
-    }),
     // Write all logs with level 'error' and below to error.log
     new winston.transports.File({ 
       filename: path.join(__dirname, 'logs', 'error.log'), 

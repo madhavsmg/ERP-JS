@@ -1,0 +1,49 @@
+
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  NODE_ENV: production
+
+# Install and Test (can be expanded later)
+test_backend:
+  stage: test
+  image: node:18
+  script:
+    - cd erp-backend
+    - npm install
+    - echo "✅ Backend dependencies installed. Add tests here later."
+
+# Optional frontend build (if needed)
+build_frontend:
+  stage: build
+  image: node:18
+  script:
+    - cd frontend
+    - echo "✅ Frontend static files ready for deployment."
+  artifacts:
+    paths:
+      - frontend
+
+# Backend Deploy to Render using Webhook (replace with your actual webhook URL)
+deploy_backend:
+  stage: deploy
+  script:
+    - curl -X POST https://api.render.com/deploy/srv-d01ej9adbo4c738mlqeg?key=SDSKyn2lZpE
+    - echo "✅ Backend deployment triggered."
+  only:
+    - main
+
+# Cloudflare Pages deploy (assumes you use wrangler)
+deploy_frontend:
+  stage: deploy
+  image: node:18
+  before_script:
+    - npm install -g wrangler
+  script:
+    - cd frontend
+    - wrangler pages publish . --project-name=erp-js --branch=main
+  only:
+    - main

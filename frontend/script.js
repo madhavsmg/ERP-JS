@@ -1,6 +1,9 @@
 let cart = [];
 
-// === Inventory ===
+// ----------------------------------
+// ============ Inventory ===========
+// ----------------------------------
+
 async function renderInventory() {
   const list = document.getElementById("inventory-list");
   list.innerHTML = "";
@@ -89,7 +92,10 @@ function deleteProduct(id) {
   }
 }
 
-// === Expenses ===
+// ---------------------------------
+// ============ Expenses ===========
+// ---------------------------------
+
 async function renderExpenses() {
   const list = document.getElementById("expense-list");
   list.innerHTML = "";
@@ -168,7 +174,10 @@ function deleteExpense(id) {
   }
 }
 
-// === POS ===
+// ----------------------------------
+// =============== POS ==============
+// ----------------------------------
+
 async function populatePOSProducts() {
   const select = document.getElementById("pos-product");
   select.innerHTML = `<option value="" disabled selected hidden>-- Select a Product --</option>`;
@@ -274,7 +283,7 @@ async function completeGroupedSale() {
     
     const orderId = "ORD" + Date.now();
     const paymentMode = document.getElementById("payment-mode").value;
-    if (!paymentMode || !paymentMode.value) return alert("Please select a payment method!");
+    if (!paymentMode) return alert("Please select a payment method!");
 
     const items = cart.map(item => ({
       product: item.name,
@@ -344,7 +353,10 @@ async function fetchCustomer() {
   }
 }
 
-// === Customer Rendering & Deletion ===
+// ----------------------------------
+// ============ Customer ============
+// ----------------------------------
+
 async function renderCustomers() {
   try {
     const res = await fetch("http://localhost:5000/customers/all");
@@ -408,6 +420,7 @@ async function updateCustomer(phone, oldName, oldCity) {
       body: JSON.stringify({ name: newName, city: newCity })
     });
     renderCustomers();
+    alert("✅ Customer updated successfully!");
   } catch (err) {
     console.error("Error updating customer:", err);
     alert("Failed to update customer.");
@@ -425,7 +438,10 @@ async function deleteCustomer(phoneNumber) {
   }
 }
 
-// === Sales History ===
+// ----------------------------------
+// ============== Sales =============
+// ----------------------------------
+
 async function renderSales() {
   try {
     const res = await fetch("http://localhost:5000/sales");
@@ -451,7 +467,10 @@ async function renderSales() {
   }
 }
 
-// === Dashboard Metrics ===
+// ----------------------------------
+// ============ Dashboard ===========
+// ----------------------------------
+
 async function updateDashboard() {
   try {
     const [inventoryRes, salesRes, expensesRes] = await Promise.all([

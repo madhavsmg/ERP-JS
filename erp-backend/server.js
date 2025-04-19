@@ -142,6 +142,23 @@ app.post('/sales', async (req, res) => {
       }
     }
 
+    // 🧠 Step 1: Update inventory quantities
+    for (const item of items) {
+      const inventoryItem = await Inventory.findOne({ name: item.product });
+
+      if (!inventoryItem) {
+        return res.status(400).json({ error: `Product not found in inventory: ${item.product}` });
+      }
+
+      if (inventoryItem.qty < item.qty) {
+        return res.status(400).json({ error: `Insufficient stock for ${item.product}` });
+      }
+
+      inventoryItem.qty -= item.qty;
+      await inventoryItem.save();
+    }
+
+    // ✅ Step 2: Save the sale
     const newSale = new Sale({
       orderId,
       customer,
@@ -249,6 +266,28 @@ app.post('/customers', async (req, res) => {
   } catch (err) {
     logger.error('Error creating/finding customer', { body: req.body, error: err });
     res.status(500).json({ error: 'Failed to process customer data' });
+  }
+});
+
+app.put('/customers/:phoneNumber', async (req, res) => {
+  try {
+    const { name, city } = req.body;
+    const phoneNumber = req.params.phoneNumber;
+
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      { phoneNumber },
+      { name, city },
+      { new: true }
+    );
+
+    if (!updatedCustomer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    res.json(updatedCustomer);
+  } catch (err) {
+    logger.error('Error updating customer', { phoneNumber: req.params.phoneNumber, error: err });
+    res.status(500).json({ error: 'Failed to update customer' });
   }
 });
 
